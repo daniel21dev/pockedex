@@ -1,18 +1,49 @@
-import {useNavigation} from '@react-navigation/native';
 import React from 'react';
-import {Button, Text, View} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Text, Image, ActivityIndicator, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from '../theme/appTheme';
+import { usePokemonPaginated } from '../hooks/usePokemonPaginated';
+import { FlatList } from 'react-native-gesture-handler';
+import { PokemonCard } from '../components/PokemonCard';
 
 export const HomeScreen = () => {
-  const {navigate} = useNavigation();
+  const { top } = useSafeAreaInsets();
+  const { simplePokemonList, loadPokemos } = usePokemonPaginated();
+
   return (
-    <View>
-      <Text>Home</Text>
-      <Icon name="flask-outline" size={30} color="red" />
-      <Button
-        title="pocke screen"
-        onPress={() => navigate('PockemonScreen' as any)}
+    <>
+      <Image
+        source={require('../assets/pokebola.png')}
+        style={styles.pokebolaBG}
       />
-    </View>
+
+      <View style={{ alignItems: 'center' }}>
+        <FlatList
+          data={simplePokemonList}
+          keyExtractor={pokemon => pokemon.id}
+          showsVerticalScrollIndicator={false}
+          numColumns={2}
+          ListHeaderComponent={
+            <Text
+              style={{
+                ...styles.title,
+                ...styles.globalMargin,
+                top: top + 20,
+                marginBottom: top + 20,
+                paddingBottom: 10,
+              }}>
+              Pokedex
+            </Text>
+          }
+          renderItem={({ item }) => <PokemonCard pokemon={item} />}
+          // infinite Scroll
+          onEndReached={loadPokemos}
+          onEndReachedThreshold={0.4}
+          ListFooterComponent={
+            <ActivityIndicator style={{ height: 100 }} size={20} color="gray" />
+          }
+        />
+      </View>
+    </>
   );
 };
